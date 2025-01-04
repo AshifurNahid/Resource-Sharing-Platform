@@ -9,6 +9,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Add loading state
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -24,11 +25,31 @@ export default function Register() {
       return;
     }
 
+    setLoading(true); // Start loading spinner
+    setError(''); // Reset error state
+
     try {
-      console.log('Registration successful:', { username, email, password });
-      router.push('/auth/login');
+      const response = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setError(errorData.message || 'Registration failed');
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Registration successful:', data);
+      router.push('/auth/login'); // Redirect to login page after successful registration
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false); // Stop loading spinner
     }
   };
 
@@ -46,6 +67,7 @@ export default function Register() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
+              disabled={loading} // Disable input during loading
             />
           </div>
           <div className="mb-3">
@@ -56,6 +78,7 @@ export default function Register() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
+              disabled={loading} // Disable input during loading
             />
           </div>
           <div className="mb-3">
@@ -66,6 +89,7 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
+              disabled={loading} // Disable input during loading
             />
           </div>
           <div className="mb-3">
@@ -76,10 +100,15 @@ export default function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your password"
+              disabled={loading} // Disable input during loading
             />
           </div>
-          <button type="submit" className="btn modern-button w-100 mt-4">
-            Register
+          <button
+            type="submit"
+            className="btn modern-button w-100 mt-4"
+            disabled={loading} // Disable button during loading
+          >
+            {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
         <p className="mt-4 text-center">
