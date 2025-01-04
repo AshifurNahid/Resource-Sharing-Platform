@@ -53,7 +53,6 @@ public class AuthController {
         }
     }
 
-    // Update Profile Endpoint
     @PutMapping("/profile/{id}")
     public ResponseEntity<String> updateProfile(@PathVariable Long id, @RequestBody User updatedUser) {
         try {
